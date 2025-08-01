@@ -112,5 +112,7 @@ def drive():
     finally: 
         GPIO.cleanup
 
+drive () #actually needs to run the function to make the thing go!
+
     
 
