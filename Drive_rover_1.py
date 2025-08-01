@@ -1,3 +1,5 @@
+import keyboard
+
 import threading
 
 import time 
@@ -83,6 +85,29 @@ try:
     backward(512)
     
     print("did it work?")
+
+
+
+def drive():
+    print("Control the rover with WASD keys. Press 'q' to quit.")
+    try:
+        while True:
+            if keyboard.is_pressed('w'):
+                forward(512)
+            elif keyboard.is_pressed('s'):
+                backward(512)
+            elif keyboard.is_pressed('a'):
+                turn_left(512)
+            elif keyboard.is_pressed('d'):
+                turn_right(512)
+            elif keyboard.is_pressed('q'):
+                print("Quitting...")
+                break
+            else:
+                stop()  # Stop motors if no key is pressed
+            time.sleep(0.1)  # Add small delay to reduce CPU usage
+
+
     
 
 finally:
