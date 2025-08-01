@@ -76,7 +76,14 @@ try:
     time.sleep(1)
     print("turn right")
     turn_right(512)
+    
+    print("forward")
+    forward(512)
+    print("backward")
+    backward(512)
+    
     print("did it work?")
+    
 
 finally:
     GPIO.cleanup()
