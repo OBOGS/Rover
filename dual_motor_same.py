@@ -11,7 +11,7 @@ left_motor_pins = [17, 18, 27, 22]
 # Motor 2 pins
 right_motor_pins = [5, 6, 13, 19]
 
-for pin in motor1_pins + motor2_pins:
+for pin in left_motor_pins + right_motor_pins:
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, False)
 
