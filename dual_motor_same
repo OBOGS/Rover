@@ -1,5 +1,6 @@
 ##insert code here##
-  import time
+
+import time
 import RPi.GPIO as GPIO
 
 # Setup
