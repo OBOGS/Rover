@@ -52,5 +52,5 @@ def stop():
     for pin in left_motor_pins + right_motor_pins:
         GPIO.output(pin, 0)
 
-finally:
-    GPIO.cleanup()
+#finally:
+    #GPIO.cleanup()
