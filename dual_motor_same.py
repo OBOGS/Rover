@@ -61,4 +61,4 @@ try:
     print("did it work?")
 
 finally:
-    #GPIO.cleanup()
+    GPIO.cleanup()
