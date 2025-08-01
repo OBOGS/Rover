@@ -7,9 +7,9 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 
 # Motor 1 pins
-motor1_pins = [17, 18, 27, 22]
+left_motor_pins = [17, 18, 27, 22]
 # Motor 2 pins
-motor2_pins = [5, 6, 13, 19]
+right_motor_pins = [5, 6, 13, 19]
 
 for pin in motor1_pins + motor2_pins:
     GPIO.setup(pin, GPIO.OUT)
