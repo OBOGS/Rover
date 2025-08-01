@@ -9,6 +9,9 @@ import RPi.GPIO as GPIO
 # Setup
 GPIO.setmode(GPIO.BCM)
 
+GPIO.setwarnings(False)
+
+
 # Motor 1 pins
 left_motor_pins = [17, 18, 27, 22]
 # Motor 2 pins
