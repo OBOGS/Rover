@@ -106,8 +106,8 @@ def drive():
             else:
                 stop()  # Stop motors if no key is pressed
             time.sleep(0.1)  # Add small delay to reduce CPU usage
-    finally: 
-        GPIO.cleanup()
+        finally: 
+            GPIO.cleanup()
 
 
     
