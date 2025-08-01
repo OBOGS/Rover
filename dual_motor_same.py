@@ -52,5 +52,13 @@ def stop():
     for pin in left_motor_pins + right_motor_pins:
         GPIO.output(pin, 0)
 
-#finally:
+try:
+    print("turn left")
+    turn_left(512)
+    time.sleep(1)
+    print("turn right")
+    turn_right(512)
+    print("did it work?")
+
+finally:
     #GPIO.cleanup()
