@@ -87,6 +87,8 @@ try:
     print("did it work?")
 
 
+finally:
+    GPIO.cleanup()
 
 def drive():
     print("Control the rover with WASD keys. Press 'q' to quit.")
@@ -106,11 +108,9 @@ def drive():
             else:
                 stop()  # Stop motors if no key is pressed
             time.sleep(0.1)  # Add small delay to reduce CPU usage
-        finally: 
-            GPIO.cleanup()
 
+    finally: 
+        GPIO.cleanup
 
     
 
-finally:
-    GPIO.cleanup()
