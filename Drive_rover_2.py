@@ -34,7 +34,7 @@ def threaded_move(pins, steps, direction):
     return threading.Thread(target=move_motor, args=(pins, steps, 0.001, direction))
 
 def forward(steps):
-    left = threaded_move(left_motor_pins, steps, 1)
+    left = threaded_move(left_motor_pins, steps, -1)
     right = threaded_move(right_motor_pins, steps, 1)
     left.start()
     right.start()
@@ -42,7 +42,7 @@ def forward(steps):
     right.join()
 
 def backward(steps):
-    left = threaded_move(left_motor_pins, steps, -1)
+    left = threaded_move(left_motor_pins, steps, 1)
     right = threaded_move(right_motor_pins, steps, -1)
     left.start()
     right.start()
@@ -55,7 +55,7 @@ def turn_left(steps):
     right.join()
 
 def turn_right(steps):
-    left = threaded_move(left_motor_pins, steps, 1)
+    left = threaded_move(left_motor_pins, steps, -1)
     left.start()
     left.join()
 
