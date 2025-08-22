@@ -8,6 +8,68 @@ import time
 
 # ... (copy motor functions here: move_motor, threaded_move, forward, etc.)
 
+# --- GPIO SETUP ---
+GPIO.setmode(GPIO.BCM)
+left_motor_pins = [17, 18, 27, 22]
+right_motor_pins = [5, 6, 13, 19]
+
+for pin in left_motor_pins + right_motor_pins:
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, False)
+
+step_sequence = [
+    [1, 0, 0, 1],
+    [1, 0, 0, 0],
+    [1, 1, 0, 0],
+    [0, 1, 0, 0],
+    [0, 1, 1, 0],
+    [0, 0, 1, 0],
+    [0, 0, 1, 1],
+    [0, 0, 0, 1]
+]
+
+def move_motor(pins, step_count, delay=0.001, direction=1):
+    for _ in range(step_count):
+        for step in range(8)[::direction]:
+            for pin in range(4):
+                GPIO.output(pins[pin], step_sequence[step][pin])
+            time.sleep(delay)
+
+def threaded_move(pins, steps, direction):
+    return threading.Thread(target=move_motor, args=(pins, steps, 0.001, direction))
+
+def forward(steps):
+    left = threaded_move(left_motor_pins, steps, -1)
+    right = threaded_move(right_motor_pins, steps, 1)
+    left.start()
+    right.start()
+    left.join()
+    right.join()
+
+def backward(steps):
+    left = threaded_move(left_motor_pins, steps, 1)
+    right = threaded_move(right_motor_pins, steps, -1)
+    left.start()
+    right.start()
+    left.join()
+    right.join()
+
+def turn_left(steps):
+    right = threaded_move(right_motor_pins, steps, 1)
+    right.start()
+    right.join()
+
+def turn_right(steps):
+    left = threaded_move(left_motor_pins, steps, -1)
+    left.start()
+    left.join()
+
+def stop():
+    for pin in left_motor_pins + right_motor_pins:
+        GPIO.output(pin, 0)
+
+# the above was copied from previous code
+
 app = Flask(__name__)
 
 HTML = """
