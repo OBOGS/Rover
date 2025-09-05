@@ -3,6 +3,8 @@ import RPi.GPIO as GPIO
 import threading
 import time
 
+full_turn_steps = 128
+
 # --- GPIO and motor setup (reuse your functions from previous code) ---
 
 
@@ -90,13 +92,13 @@ def control():
     if request.method == 'POST':
         action = request.form['action']
         if action == 'forward':
-            forward(128)
+            forward(full_turn_steps)
         elif action == 'backward':
-            backward(128)
+            backward(full_turn_steps)
         elif action == 'left':
-            turn_left(128)
+            turn_left(full_turn_steps)
         elif action == 'right':
-            turn_right(128)
+            turn_right(full_turn_steps)
         elif action == 'stop':
             stop()
     return render_template_string(HTML)
