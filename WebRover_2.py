@@ -296,12 +296,21 @@ HTML_TEMPLATE = """
                 
                 if (!gamepad) return;
                 
-                // Read joysticks
-                const leftX = gamepad.axes[0];
-                const leftY = gamepad.axes[1];
-                const rightX = gamepad.axes[2];
-                const rightY = gamepad.axes[3];
-                const leftTrigger = gamepad.axes[6];
+                // Read joysticks with safe defaults
+                const leftX = gamepad.axes[0] || 0;
+                const leftY = gamepad.axes[1] || 0;
+                const rightX = gamepad.axes[2] || 0;
+                const rightY = gamepad.axes[3] || 0;
+                
+                // Try different trigger mappings (varies by controller/browser)
+                let leftTrigger = 0;
+                if (gamepad.axes[6] !== undefined) {
+                    leftTrigger = gamepad.axes[6];
+                } else if (gamepad.axes[4] !== undefined) {
+                    leftTrigger = gamepad.axes[4];
+                } else if (gamepad.buttons[6] !== undefined) {
+                    leftTrigger = gamepad.buttons[6].value;
+                }
                 
                 // Update display
                 document.getElementById('leftX').textContent = leftX.toFixed(2);
@@ -316,6 +325,11 @@ HTML_TEMPLATE = """
                 const driveMode = leftTrigger > 0.5 ? 'Arcade Drive' : 'Tank Drive';
                 document.getElementById('driveMode').textContent = `Drive Mode: ${driveMode}`;
                 
+                // Safe button reading
+                const getButton = (index) => {
+                    return gamepad.buttons[index] ? gamepad.buttons[index].pressed : false;
+                };
+                
                 // Send controller data to server
                 socket.emit('controller_data', {
                     leftX: leftX,
@@ -324,16 +338,16 @@ HTML_TEMPLATE = """
                     rightY: -rightY, // Invert Y axis
                     leftTrigger: leftTrigger,
                     buttons: {
-                        A: gamepad.buttons[0].pressed,
-                        B: gamepad.buttons[1].pressed,
-                        X: gamepad.buttons[2].pressed,
-                        Y: gamepad.buttons[3].pressed
+                        A: getButton(0),
+                        B: getButton(1),
+                        X: getButton(2),
+                        Y: getButton(3)
                     },
                     dpad: {
-                        up: gamepad.buttons[12].pressed,
-                        down: gamepad.buttons[13].pressed,
-                        left: gamepad.buttons[14].pressed,
-                        right: gamepad.buttons[15].pressed
+                        up: getButton(12),
+                        down: getButton(13),
+                        left: getButton(14),
+                        right: getButton(15)
                     }
                 });
                 
