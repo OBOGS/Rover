@@ -293,6 +293,8 @@ HTML_TEMPLATE = """
             function gamepadLoop() {
                 if (!gamepad) return;
                 
+                const currentTime = Date.now();
+                
                 // Get fresh gamepad state
                 const gamepads = navigator.getGamepads();
                 gamepad = gamepads[gamepad.index];
@@ -315,7 +317,7 @@ HTML_TEMPLATE = """
                     leftTrigger = gamepad.buttons[6].value;
                 }
                 
-                // Update display
+                // Update display every frame
                 document.getElementById('leftX').textContent = leftX.toFixed(2);
                 document.getElementById('leftY').textContent = leftY.toFixed(2);
                 document.getElementById('rightX').textContent = rightX.toFixed(2);
@@ -328,31 +330,36 @@ HTML_TEMPLATE = """
                 const driveMode = leftTrigger > 0.5 ? 'Arcade Drive' : 'Tank Drive';
                 document.getElementById('driveMode').textContent = `Drive Mode: ${driveMode}`;
                 
-                // Safe button reading
-                const getButton = (index) => {
-                    return gamepad.buttons[index] ? gamepad.buttons[index].pressed : false;
-                };
-                
-                // Send controller data to server
-                socket.emit('controller_data', {
-                    leftX: leftX,
-                    leftY: -leftY, // Invert Y axis
-                    rightX: rightX,
-                    rightY: -rightY, // Invert Y axis
-                    leftTrigger: leftTrigger,
-                    buttons: {
-                        A: getButton(0),
-                        B: getButton(1),
-                        X: getButton(2),
-                        Y: getButton(3)
-                    },
-                    dpad: {
-                        up: getButton(12),
-                        down: getButton(13),
-                        left: getButton(14),
-                        right: getButton(15)
-                    }
-                });
+                // Only send data at controlled intervals
+                if (currentTime - lastSendTime >= SEND_INTERVAL) {
+                    // Safe button reading
+                    const getButton = (index) => {
+                        return gamepad.buttons[index] ? gamepad.buttons[index].pressed : false;
+                    };
+                    
+                    // Send controller data to server
+                    socket.emit('controller_data', {
+                        leftX: leftX,
+                        leftY: -leftY, // Invert Y axis
+                        rightX: rightX,
+                        rightY: -rightY, // Invert Y axis
+                        leftTrigger: leftTrigger,
+                        buttons: {
+                            A: getButton(0),
+                            B: getButton(1),
+                            X: getButton(2),
+                            Y: getButton(3)
+                        },
+                        dpad: {
+                            up: getButton(12),
+                            down: getButton(13),
+                            left: getButton(14),
+                            right: getButton(15)
+                        }
+                    });
+                    
+                    lastSendTime = currentTime;
+                }
                 
                 animationId = requestAnimationFrame(gamepadLoop);
             }
