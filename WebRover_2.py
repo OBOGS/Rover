@@ -60,6 +60,9 @@ def move_rover(left_steps, right_steps):
         thread.join()
 
 def stop_motors():
+    """Stop all motors immediately"""
+    global current_threads
+    stop_all_threads()
     for pin in left_motor_pins + right_motor_pins:
         GPIO.output(pin, 0)
 
