@@ -30,38 +30,81 @@ step_sequence = [
     [0, 0, 0, 1]
 ]
 
+# --- Global thread management ---
+current_threads = []
+thread_stop_flags = []
+
+def stop_all_threads():
+    """Stop all running motor threads"""
+    global current_threads, thread_stop_flags
+    
+    # Set all stop flags
+    for flag in thread_stop_flags:
+        flag['stop'] = True
+    
+    # Wait for all threads to finish
+    for thread in current_threads:
+        if thread.is_alive():
+            thread.join(timeout=1.0)
+    
+    # Clear the lists
+    current_threads.clear()
+    thread_stop_flags.clear()
+
 # --- Motor Control Functions ---
-def move_motor(pins, step_count, delay=0.001, direction=1):
+def move_motor(pins, step_count, delay=0.001, direction=1, stop_flag=None):
+    """Move a single motor with stop flag support"""
     for _ in range(abs(step_count)):
+        # Check stop flag
+        if stop_flag and stop_flag.get('stop', False):
+            break
+            
         for step in range(8)[::direction]:
+            # Check stop flag again for faster response
+            if stop_flag and stop_flag.get('stop', False):
+                break
+                
             for pin in range(4):
                 GPIO.output(pins[pin], step_sequence[step][pin])
             time.sleep(delay)
+    
+    # Turn off all pins when done
+    for pin in pins:
+        GPIO.output(pin, False)
 
-def threaded_move(pins, steps, direction):
-    return threading.Thread(target=move_motor, args=(pins, abs(steps), 0.001, direction))
+def threaded_move(pins, steps, direction, stop_flag):
+    """Create a thread for motor movement with stop flag"""
+    return threading.Thread(target=move_motor, args=(pins, abs(steps), 0.001, direction, stop_flag))
 
 def move_rover(left_steps, right_steps):
+    """Move the rover with both motors"""
+    global current_threads, thread_stop_flags
+    
+    # Stop any existing movement
+    stop_all_threads()
+    
     threads = []
     
     if left_steps != 0:
         left_direction = -1 if left_steps > 0 else 1
-        left_thread = threaded_move(left_motor_pins, abs(left_steps), left_direction)
+        left_stop_flag = {'stop': False}
+        thread_stop_flags.append(left_stop_flag)
+        left_thread = threaded_move(left_motor_pins, abs(left_steps), left_direction, left_stop_flag)
         threads.append(left_thread)
+        current_threads.append(left_thread)
         left_thread.start()
     
     if right_steps != 0:
         right_direction = 1 if right_steps > 0 else -1
-        right_thread = threaded_move(right_motor_pins, abs(right_steps), right_direction)
+        right_stop_flag = {'stop': False}
+        thread_stop_flags.append(right_stop_flag)
+        right_thread = threaded_move(right_motor_pins, abs(right_steps), right_direction, right_stop_flag)
         threads.append(right_thread)
+        current_threads.append(right_thread)
         right_thread.start()
-    
-    for thread in threads:
-        thread.join()
 
 def stop_motors():
     """Stop all motors immediately"""
-    global current_threads
     stop_all_threads()
     for pin in left_motor_pins + right_motor_pins:
         GPIO.output(pin, 0)
@@ -253,6 +296,8 @@ HTML_TEMPLATE = """
         const socket = io();
         let gamepad = null;
         let animationId = null;
+        let lastSendTime = 0;
+        const SEND_INTERVAL = 50; // Send data every 50ms (20 FPS)
         
         // Gamepad connection
         window.addEventListener("gamepadconnected", (e) => {
