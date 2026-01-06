@@ -480,11 +480,36 @@ class RoverWebServer:
                     except:
                         self.websockets.discard(ws)
     
+    async def startup_tasks(self, app):
+        """
+        Background tasks that start when the server starts
+        
+        LEARNING POINT: This is called by aiohttp when the event loop is ready
+        Now we can safely create async tasks
+        """
+        app['health_task'] = asyncio.create_task(self.broadcast_health())
+        logger.info("Health monitoring started")
+    
+    async def cleanup_tasks(self, app):
+        """Clean up background tasks on shutdown"""
+        if 'health_task' in app:
+            app['health_task'].cancel()
+            try:
+                await app['health_task']
+            except asyncio.CancelledError:
+                pass
+    
     def run(self, host='0.0.0.0', port=8080):
-        """Start the web server"""
+        """
+        Start the web server
+        
+        LEARNING POINT: We register startup/cleanup handlers instead of
+        creating tasks directly. This ensures the event loop exists.
+        """
         try:
-            # Start health broadcast task
-            asyncio.create_task(self.broadcast_health())
+            # Register startup and cleanup handlers
+            self.app.on_startup.append(self.startup_tasks)
+            self.app.on_cleanup.append(self.cleanup_tasks)
             
             logger.info(f"Starting Mars Rover server on http://{host}:{port}")
             logger.info("Tank Drive Enabled: Left stick = left motor, Right stick = right motor")
