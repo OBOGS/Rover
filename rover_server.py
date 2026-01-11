@@ -156,7 +156,7 @@ class RoverMotorController:
         
         # Start new tasks at specified speeds
         self.left_task = asyncio.create_task(self.left_motor.run_at_speed(left_speed))
-        self.right_task = asyncio.create_task(self.right_motor.run_at_speed(right_speed))
+        self.right_task = asyncio.create_task(self.right_motor.run_at_speed(-right_speed))
     
     async def move_forward(self, speed: float = 0.003):
         """Move rover forward - both motors same direction (for button control)"""
