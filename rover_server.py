@@ -102,7 +102,7 @@ class StepperMotor:
             self.stop()
             return
         
-        base_delay = 0.0001
+        base_delay = 0.00001
         delay = base_delay / abs(speed)
         direction = 1 if speed > 0 else -1
         
